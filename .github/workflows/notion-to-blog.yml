@@ -5,7 +5,8 @@ on:
     inputs:
       notion_page_id:
         description: 'Notion Page ID'
-        required: true
+        required: false
+        default: '42181bcd288a4c5cac9b5c0ef5fe3f36'  # 기본 페이지 ID
   schedule:
     - cron: '0 0 * * *'  # 매일 자정에 실행
 
@@ -28,31 +29,42 @@ jobs:
     - name: Convert Notion to Blog Post
       env:
         NOTION_SECRET: ${{ secrets.NOTION_SECRET }}
-        NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '' }}
+        NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '42181bcd288a4c5cac9b5c0ef5fe3f36' }}
       run: |
+        echo "Converting Notion page: $NOTION_PAGE_ID"
         cat > notion-to-blog.js << EOL
         const {Client} = require("@notionhq/client");
         const {NotionToMarkdown} = require("notion-to-md");
         const fs = require("fs");
         const path = require("path");
-        const axios = require("axios");
 
         const notion = new Client({ auth: process.env.NOTION_SECRET });
         const n2m = new NotionToMarkdown({ notionClient: notion });
 
         async function convertNotionToBlogPost(pageId) {
           try {
-            const mdblocks = await n2m.pageToMarkdown(pageId);
+            // 페이지 정보 확인
             const page = await notion.pages.retrieve({ page_id: pageId });
-            const title = page.properties.title.title[0].plain_text;
+            console.log('Page retrieved:', page.id);
 
+            // 마크다운으로 변환
+            const mdblocks = await n2m.pageToMarkdown(pageId);
+            
+            // 제목 추출 (Notion 페이지 구조에 따라 다를 수 있음)
+            const title = page.properties.title ? 
+              page.properties.title.title[0].plain_text : 
+              'Untitled';
+
+            // Markdown 문자열 정제
             let mdString = n2m.toMarkdownString(mdblocks);
             mdString.parent = mdString.parent.replace(/\n\n/g, "\n");
 
+            // 파일명 생성
             const date = new Date().toISOString().split('T')[0].replace(/-/g, '-');
             const filename = \`\${date}-\${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md\`;
             const filepath = path.join(process.cwd(), 'posts', filename);
 
+            // 파일 쓰기
             fs.writeFileSync(filepath, \`---
 title: "\${title}"
 date: \${date}
@@ -63,6 +75,7 @@ date: \${date}
             console.log(\`Blog post created: \${filename}\`);
           } catch (error) {
             console.error('Error converting Notion page:', error);
+            console.error('Error details:', error.body ? JSON.stringify(error.body) : error.message);
             process.exit(1);
           }
         }
@@ -76,6 +89,6 @@ date: \${date}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "<>"
-        git add posts
-        git commit -m "Add blog post from Notion" || exit 0
-        git push
+        git add posts || echo "No changes to commit"
+        git diff-index --quiet HEAD || git commit -m "Add blog post from Notion"
+        git push || echo "No changes to push"
