@@ -2,6 +2,30 @@
   "dependencies": {
     "@notionhq/client": "^2.2.15",
     "axios": "^1.7.2",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0",
     "notion-to-md": "^3.1.1"
-  }
+  },
+  "name": "kkardd.github.io",
+  "version": "1.0.0",
+  "description": "[https://kkardd.github.io](https://kkardd.github.io/)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KKardy/kkardd.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KKardy/kkardd.github.io/issues"
+  },
+  "homepage": "https://github.com/KKardy/kkardd.github.io#readme"
 }
