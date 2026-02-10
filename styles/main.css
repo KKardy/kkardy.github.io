@@ -18,6 +18,105 @@ body {
     background-color: #121212;
     color: #e0e0e0;
     font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        padding: 20px 15px;
+        font-size: 15px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header h1 {
+        margin-bottom: 15px;
+    }
+
+    header nav {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    header nav a {
+        margin: 0 10px 10px 0;
+    }
+
+    .posts-list article {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+    }
+
+    .posts-list h2 {
+        font-size: 1.2rem;
+    }
+
+    .post h1 {
+        font-size: 1.6rem;
+    }
+
+    pre {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    body {
+        padding: 15px 10px;
+        font-size: 14px;
+    }
+
+    header nav a {
+        margin: 0 5px 10px 0;
+        font-size: 0.9rem;
+    }
+
+    .posts-list h2 {
+        font-size: 1.1rem;
+    }
+
+    .post h1 {
+        font-size: 1.4rem;
+    }
+
+    pre {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+}
+
+/* 모바일에서 터치 영역 개선 */
+a, button {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 모바일 친화적인 선택 영역 */
+@media (pointer: coarse) {
+    a, button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* 텍스트 가독성 개선 */
+p, li {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* 이미지 반응형 처리 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
 }
 
 a {
