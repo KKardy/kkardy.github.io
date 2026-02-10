@@ -68,6 +68,7 @@ function generateIndexHTML(posts) {
 function build() {
   ensureDirectoryExists(DIST_DIR);
   ensureDirectoryExists(path.join(DIST_DIR, 'posts'));
+  ensureDirectoryExists(path.join(DIST_DIR, 'styles'));
 
   const posts = readPosts();
 
@@ -80,6 +81,20 @@ function build() {
     const postHTML = generatePostHTML(post);
     fs.writeFileSync(path.join(DIST_DIR, 'posts', `${post.filename}.html`), postHTML);
   });
+
+  // 스타일시트 복사
+  const STYLES_DIR = path.join(__dirname, '..', 'styles');
+  const destStylePath = path.join(DIST_DIR, 'styles', 'main.css');
+  fs.copyFileSync(path.join(STYLES_DIR, 'main.css'), destStylePath);
+
+  // 레이아웃 템플릿에 스타일시트 경로 업데이트
+  const layoutTemplatePath = path.join(TEMPLATES_DIR, 'layout.html');
+  let layoutContent = fs.readFileSync(layoutTemplatePath, 'utf8');
+  layoutContent = layoutContent.replace(
+    '{{STYLES_PATH}}', 
+    '/styles/main.css'
+  );
+  fs.writeFileSync(layoutTemplatePath, layoutContent);
 
   console.log('블로그 빌드 완료!');
 }
