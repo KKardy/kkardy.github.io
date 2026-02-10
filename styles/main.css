@@ -12,11 +12,101 @@
 body {
     font-family: 'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.8;
-    max-width: 800px;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 20px;
-    background-color: #0a0a0a;
+    padding: 40px 20px;
+    background-color: #121212;
     color: #e0e0e0;
+    font-size: 16px;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #2980b9;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    border-bottom: 1px solid #2c2c2c;
+    padding-bottom: 20px;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    color: #ffffff;
+    margin: 0;
+}
+
+header nav a {
+    margin-left: 15px;
+    color: #888;
+    font-weight: 500;
+}
+
+.posts-list article {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #2c2c2c;
+}
+
+.posts-list h2 {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.posts-list time {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.post-content {
+    line-height: 1.9;
+}
+
+.post h1 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #2c2c2c;
+    padding-bottom: 10px;
+}
+
+.post time {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+code {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+pre {
+    background-color: #1a1a1a;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    border: 1px solid #2c2c2c;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    border: none;
 }
 
 header {
