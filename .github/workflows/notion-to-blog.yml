@@ -28,7 +28,8 @@ jobs:
     
     - name: Convert Notion to Blog Post
       env:
-        NOTION_SECRET: ${{ secrets.NOTION_SECRET }}
+        NOTION_KEY: ${{ secrets.NOTION_KEY }}
+        NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
         NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '42181bcd288a4c5cac9b5c0ef5fe3f36' }}
       run: |
         cat > notion-to-blog.js << 'EOF'
@@ -37,7 +38,7 @@ jobs:
         const fs = require("fs");
         const path = require("path");
 
-        const notion = new Client({ auth: process.env.NOTION_SECRET });
+        const notion = new Client({ auth: process.env.NOTION_KEY });
         const n2m = new NotionToMarkdown({ notionClient: notion });
 
         async function convertNotionToBlogPost(pageId) {
