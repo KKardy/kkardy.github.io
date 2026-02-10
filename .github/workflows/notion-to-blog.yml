@@ -8,7 +8,7 @@ on:
         required: false
         default: '42181bcd288a4c5cac9b5c0ef5fe3f36'
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # 매일 자정에 실행
 
 jobs:
   notion-to-blog:
@@ -25,31 +25,49 @@ jobs:
       run: |
         npm init -y
         npm install @notionhq/client notion-to-md axios
+        npm install -g debug
     
     - name: Convert Notion to Blog Post
       env:
         NOTION_KEY: ${{ secrets.NOTION_KEY }}
         NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '42181bcd288a4c5cac9b5c0ef5fe3f36' }}
+        DEBUG: "*"
       run: |
         node -e "
         const { Client } = require('@notionhq/client');
         const { NotionToMarkdown } = require('notion-to-md');
         const fs = require('fs');
         const path = require('path');
+        const debug = require('debug')('notion:blog');
 
-        const notion = new Client({ auth: process.env.NOTION_KEY });
-        const n2m = new NotionToMarkdown({ notionClient: notion });
+        console.log('Starting Notion to Blog conversion');
+        console.log('Notion Page ID:', process.env.NOTION_PAGE_ID);
+        console.log('Notion Key Length:', process.env.NOTION_KEY ? process.env.NOTION_KEY.length : 'No key');
+
+        const notion = new Client({ 
+          auth: process.env.NOTION_KEY,
+          timeoutMs: 60000  // 60 seconds timeout
+        });
+        const n2m = new NotionToMarkdown({ 
+          notionClient: notion 
+        });
 
         async function convertNotionToBlogPost(pageId) {
           try {
+            console.log('Attempting to retrieve page:', pageId);
             const page = await notion.pages.retrieve({ page_id: pageId });
-            console.log('Page retrieved:', page.id);
+            console.log('Page retrieved successfully:', page.id);
+
+            debug('Page properties:', JSON.stringify(page.properties, null, 2));
+
+            const title = page.properties.title && page.properties.title.title.length > 0 
+              ? page.properties.title.title[0].plain_text 
+              : 'Untitled';
+            
+            console.log('Page Title:', title);
 
             const mdblocks = await n2m.pageToMarkdown(pageId);
-            
-            const title = page.properties.title ? 
-              page.properties.title.title[0].plain_text : 
-              'Untitled';
+            debug('Markdown blocks:', JSON.stringify(mdblocks, null, 2));
 
             let mdString = n2m.toMarkdownString(mdblocks);
             mdString.parent = mdString.parent.replace(/\n\n/g, '\n');
@@ -57,6 +75,8 @@ jobs:
             const date = new Date().toISOString().split('T')[0].replace(/-/g, '-');
             const filename = `${date}-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
             const filepath = path.join(process.cwd(), 'posts', filename);
+
+            console.log('Will write to filepath:', filepath);
 
             fs.writeFileSync(filepath, `---
 title: \"${title}\"
@@ -67,7 +87,9 @@ ${mdString.parent}`);
 
             console.log(`Blog post created: ${filename}`);
           } catch (error) {
-            console.error('Error converting Notion page:', error);
+            console.error('FULL ERROR:', error);
+            console.error('Error converting Notion page:', error.message);
+            console.error('Error stack:', error.stack);
             process.exit(1);
           }
         }
