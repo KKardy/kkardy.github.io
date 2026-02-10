@@ -31,8 +31,7 @@ jobs:
         NOTION_SECRET: ${{ secrets.NOTION_SECRET }}
         NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '42181bcd288a4c5cac9b5c0ef5fe3f36' }}
       run: |
-        echo "Converting Notion page: $NOTION_PAGE_ID"
-        cat > notion-to-blog.js << EOL
+        cat > notion-to-blog.js << 'EOF'
         const {Client} = require("@notionhq/client");
         const {NotionToMarkdown} = require("notion-to-md");
         const fs = require("fs");
@@ -61,18 +60,18 @@ jobs:
 
             // 파일명 생성
             const date = new Date().toISOString().split('T')[0].replace(/-/g, '-');
-            const filename = \`\${date}-\${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md\`;
+            const filename = `${date}-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
             const filepath = path.join(process.cwd(), 'posts', filename);
 
             // 파일 쓰기
-            fs.writeFileSync(filepath, \`---
-title: "\${title}"
-date: \${date}
+            fs.writeFileSync(filepath, `---
+title: "${title}"
+date: ${date}
 ---
 
-\${mdString.parent}\`);
+${mdString.parent}`);
 
-            console.log(\`Blog post created: \${filename}\`);
+            console.log(`Blog post created: ${filename}`);
           } catch (error) {
             console.error('Error converting Notion page:', error);
             console.error('Error details:', error.body ? JSON.stringify(error.body) : error.message);
@@ -81,7 +80,7 @@ date: \${date}
         }
 
         convertNotionToBlogPost(process.env.NOTION_PAGE_ID);
-        EOL
+        EOF
 
         node notion-to-blog.js
 
