@@ -6,9 +6,9 @@ on:
       notion_page_id:
         description: 'Notion Page ID'
         required: false
-        default: '42181bcd288a4c5cac9b5c0ef5fe3f36'  # 기본 페이지 ID
+        default: '42181bcd288a4c5cac9b5c0ef5fe3f36'
   schedule:
-    - cron: '0 0 * * *'  # 매일 자정에 실행
+    - cron: '0 0 * * *'
 
 jobs:
   notion-to-blog:
@@ -29,44 +29,37 @@ jobs:
     - name: Convert Notion to Blog Post
       env:
         NOTION_KEY: ${{ secrets.NOTION_KEY }}
-        NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
         NOTION_PAGE_ID: ${{ github.event.inputs.notion_page_id || '42181bcd288a4c5cac9b5c0ef5fe3f36' }}
       run: |
-        cat > notion-to-blog.js << 'EOF'
-        const {Client} = require("@notionhq/client");
-        const {NotionToMarkdown} = require("notion-to-md");
-        const fs = require("fs");
-        const path = require("path");
+        node -e "
+        const { Client } = require('@notionhq/client');
+        const { NotionToMarkdown } = require('notion-to-md');
+        const fs = require('fs');
+        const path = require('path');
 
         const notion = new Client({ auth: process.env.NOTION_KEY });
         const n2m = new NotionToMarkdown({ notionClient: notion });
 
         async function convertNotionToBlogPost(pageId) {
           try {
-            // 페이지 정보 확인
             const page = await notion.pages.retrieve({ page_id: pageId });
             console.log('Page retrieved:', page.id);
 
-            // 마크다운으로 변환
             const mdblocks = await n2m.pageToMarkdown(pageId);
             
-            // 제목 추출 (Notion 페이지 구조에 따라 다를 수 있음)
             const title = page.properties.title ? 
               page.properties.title.title[0].plain_text : 
               'Untitled';
 
-            // Markdown 문자열 정제
             let mdString = n2m.toMarkdownString(mdblocks);
-            mdString.parent = mdString.parent.replace(/\n\n/g, "\n");
+            mdString.parent = mdString.parent.replace(/\n\n/g, '\n');
 
-            // 파일명 생성
             const date = new Date().toISOString().split('T')[0].replace(/-/g, '-');
             const filename = `${date}-${title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.md`;
             const filepath = path.join(process.cwd(), 'posts', filename);
 
-            // 파일 쓰기
             fs.writeFileSync(filepath, `---
-title: "${title}"
+title: \"${title}\"
 date: ${date}
 ---
 
@@ -75,15 +68,12 @@ ${mdString.parent}`);
             console.log(`Blog post created: ${filename}`);
           } catch (error) {
             console.error('Error converting Notion page:', error);
-            console.error('Error details:', error.body ? JSON.stringify(error.body) : error.message);
             process.exit(1);
           }
         }
 
         convertNotionToBlogPost(process.env.NOTION_PAGE_ID);
-        EOF
-
-        node notion-to-blog.js
+        "
 
     - name: Commit and Push
       run: |
